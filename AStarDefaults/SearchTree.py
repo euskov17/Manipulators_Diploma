@@ -1,6 +1,6 @@
 from heapq import heappop, heappush, heapify
 
-class DefaultSearchTree:  
+class SearchTree:  
 
     def __init__(self):
         self._open = []  
