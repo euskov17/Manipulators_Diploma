@@ -16,7 +16,7 @@ def make_path(goal):
     return path[::-1], length
 
 
-def AStar(space_map, heuristic_func=None, search_tree=SearchTree, max_steps=1_000_000):
+def AStar(space_map, heuristic_func=None, search_tree=SearchTree, max_steps=None):
     ast = search_tree()
     steps = 0
     nodes_created = 0
@@ -43,7 +43,7 @@ def AStar(space_map, heuristic_func=None, search_tree=SearchTree, max_steps=1_00
                 ast.add_to_open(neighbour) 
         ast.add_to_closed(current_state)
         steps += 1
-        if steps > max_steps:
+        if max_steps is not None and steps > max_steps:
             print("Stop by max_steps")
             break
         if (steps + 1) % 50000 == 0:
