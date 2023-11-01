@@ -37,10 +37,16 @@ class GridMap2D:
         self._goal_angle = goal_position[1]
         self._heuristic_function = heuristic
         self._obstacles = obstacles
+        # print(self._obstacles)
+        if not self.valid(self._start_angles):
+            self._start_angles = None
         
         self.cnt = 0
         self.inverse_angles = inverse_kinematics(self._goal_position, manipulator)
-        
+    
+    def set_start(self, angles):
+        self._start_angles = angles
+    
     def get_start(self):
         return self._start_angles
 
@@ -48,9 +54,15 @@ class GridMap2D:
         dots = self._manipulator.calculate_dots(angles)
 
         for obs in self._obstacles:
-            if obs.intersect(manipulator):
+            if obs.intersect(angles, self._manipulator):
                 return False
         return True
+    
+    def random_init_start(self):
+        state = self._manipulator.generate_random_state()
+        while not self.valid(state):
+            state = self._manipulator.generate_random_state()
+        self._start_angles = state
     
     def angle_heuristic(self, angles):
         cnt = 0
