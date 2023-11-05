@@ -1,5 +1,5 @@
 from typing import List 
-from Manipulator2DMap.Manipulator2D import Manipulator_2d_supervisor
+from Manipulator2DMap.Manipulator2D import Manipulator_2d_supervisor, PI
 from Manipulator2DMap.obstacle import Obstacle
 from Manipulator2DMap.inverse_kinematics import inverse_kinematics
 from abc import ABC, abstractmethod
@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools
 import time
+import random
 import heapq
 from matplotlib.widgets import Slider
 from ipywidgets import interact
@@ -40,9 +41,25 @@ class GridMap2D:
         # print(self._obstacles)
         if not self.valid(self._start_angles):
             self._start_angles = None
-        
         self.cnt = 0
         self.inverse_angles = inverse_kinematics(self._goal_position, manipulator)
+    
+    def sample_point_on_map(self):
+        r = self._map.shape[0]
+        x = random.uniform(-r, r)
+        y = random.uniform(0, r)
+        point = np.array([x,y])
+        while (not self.check_point_correct(point)):
+            x = random.uniform(-r, r)
+            y = random.uniform(0, r)
+            point = np.array([x,y])
+        return point
+    
+    def check_point_correct(self, point):
+        for obs in self._obstacles:
+            if obs.in_sphere(point):
+                return False
+        return True
     
     def set_start(self, angles):
         self._start_angles = angles
@@ -78,7 +95,10 @@ class GridMap2D:
         if self._heuristic_function is not None:
             dots = self._manipulator.calculate_dots(angles)
             return self._heuristic_function(dots, self.goal_position)
-        return self.dist_to_finish(angles)# + self.angle_to_finish(angles)
+        euclid = self.dist_to_finish(angles)
+        angle_dist = self.angle_to_finish(angles)
+        weight = 1 / (10 + euclid + angle_dist)
+        return euclid + weight * angle_dist
     
     def get_successors(self, angles):
         successors = []
@@ -88,7 +108,12 @@ class GridMap2D:
         return successors
 
     def angle_to_finish(self, angles):
-        return abs(angles[-1] - self._goal_angle)
+        last_angle = (np.sum(angles) + PI / 2) % (2 * PI)
+        # if (last_angle > 0):
+        #     last_angle -= PI
+        # else:
+        #     last_angle += PI
+        return abs(last_angle - self._goal_angle)
 
     def is_goal(self, angles):
-        return self.dist_to_finish(angles) < self.eps and self.angle_to_finish(angles) < self.eps
+        return self.dist_to_finish(angles) < self.eps and self.angle_to_finish(angles) < 5 * self.eps

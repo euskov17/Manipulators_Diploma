@@ -27,7 +27,7 @@ def AStar(space_map, heuristic_func=None, search_tree=SearchTree, max_steps=None
     ast.add_to_open(start)
 
     current_state = start
-    while (not ast.open_is_empty()) and (space_map.dist_to_finish(current_state.state) > .1):
+    while not ast.open_is_empty():
         current_state = ast.get_best_node_from_open()
         if (current_state is None):
             break
@@ -48,8 +48,8 @@ def AStar(space_map, heuristic_func=None, search_tree=SearchTree, max_steps=None
             break
         if (steps + 1) % 50000 == 0:
             print(f"step = {steps + 1} g = {current_state.g} heuristic = {current_state.h} dist = {space_map.dist_to_finish(current_state.state)}")
-    if space_map.dist_to_finish(current_state.state) > .5:    
-        print("OPEN is empty")
+ 
+    print("OPEN is empty")
     OPEN = ast.OPEN 
     CLOSED = ast.CLOSED
     return False, current_state, steps, nodes_created, OPEN, CLOSED
