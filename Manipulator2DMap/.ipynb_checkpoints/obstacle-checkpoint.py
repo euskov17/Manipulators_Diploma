@@ -23,3 +23,6 @@ class SphereObstacle(Obstacle):
             if 0 <= t <= 1 and np.linalg.norm(joint_coordinates[i] + arm_vec * t - self.center) < self.r:
                 return True
         return False
+    
+    def in_sphere(self, point):
+        return np.linalg.norm(point - self.center) <= self.r
